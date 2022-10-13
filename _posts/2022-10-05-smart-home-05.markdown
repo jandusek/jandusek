@@ -1,0 +1,85 @@
+---
+layout: post
+title: "Smart home #5: Lights"
+image: lights.jpg
+date: 2022-10-05 08:33:00 +0800
+---
+
+Things you may want to do with lights, in order of usefulness:
+
+1. **Turn on/off** - absolutely necessary
+1. **Dim up/down** - very useful, I'd highly recommend this
+1. **Color temperature**, also known as 'tunable white'
+    * There is conflicting research on whether blue light is [bad](https://www.frontiersin.org/articles/10.3389/fphys.2022.943108/full) for your sleep or [not](https://time.com/5752454/blue-light-sleep/)
+    * It could be a placebo, but I feel warm lighting helps me wind down
+1. **RGB color** - not very useful in my opinion, safe to ignore
+
+---
+
+## My requirements
+
+* **Wired control** for reliability (either DALI or KNX)
+* **Tunable white** or rather points 1-3 from above, but 1-2 are supported by almost all lights
+
+Frankly, for wired lights, the tunable white was more trouble than it's worth as it limits your options significantly. If I did this again, I would probably just pick a light with fixed warm color.
+
+---
+
+## DALI lights
+
+The only lights on the market I found that can do both wired control (over DALI) and tunable white were:
+
+##### Downlights
+* OSRAM CORE-DL-RC-25-B-TW-80-WHT 26.4W light
+* OSRAM OTI DALI 35-220-240-1A0 NFC TW driver
+* OSRAM CORE-DL-RC-20-B-TW-80 WHT 13.4W light
+* OSRAM OTI DALI 35-220-240-1A0 NFC TW driver
+
+**LED strips for cove light**
+* OSRAM LF1200TW-G3-827-65 94.5W LED strip
+* OSRAM OTI DALI 50 220-240 24 TW driver
+
+I'm using a [KNX-DALI gateway](https://www.futurasmus-knxgroup.com/producto.php?cod_producto=62692) so the DALI bus is accessed through the KNX bus. This sounds convoluted, but I couldn't find a device that could control DALI directly from HA. And since I already had KNX, this was the obvious choice.
+
+The KNX-DALI gateway can associate each light with a specific KNX group address. This allows the KNX switches to control the lights directly within the KNX bus. For every other control channel, I'm exposing the lights to HA through the KNX IP interface. This setup allows HA to focus on KNX and not have to worry about DALI.
+
+---
+
+## Philips Hue lights
+
+There were some lights I could not use DALI for. Either because of their location that would make wiring impractical or because of their physical form, where there just were no DALI or KNX lights on the market in this shape/form (for example bedside lights or terrace wall lights).
+
+For those, I've used Philips Hue, both in the regular [E27](https://www.philips-hue.com/en-my/p/hue-white-and-color-ambiance-single-bulb-e27/8718696725580) and the [GU10](https://www.philips-hue.com/en-hk/p/hue-white-ambiance-1-pack-gu10/8719514339941) spotlight forms.
+
+**Yes, but:** This works, but **not reliably**. This could be because I live in Singapore where the 2.4GHz spectrum (used by both WiFi and Hue's Zigbee) is quite busy. But essentially, 1 out of 10 times when I turn on a group of 3 lights, one or two of those lights will fail to react.
+
+---
+
+## Ideas for automation
+
+#### Change the light temperature to match the sun
+
+I wanted my tunable white lights to be cool white during the day, and then slowly transition into warm white for nighttime.
+
+![]({{ site.baseurl }}/images/lights_temp_1.png)
+*Node-RED flow that sets the temperature for both DALI and Philips Hue lights*
+
+![]({{ site.baseurl }}/images/lights_temp_2.png)
+*Primitive hour-to-temperature curve used by the 'CCT curve' node*
+
+#### Turn lights on when presence detected
+
+A simple use case that is usually implemented either with dumb lights being turned on by a PIR sensor or directly in KNX. However, I had some extra requirements that made this more challenging:
+
+* in the bathroom, use downlights during the day; at night use only cove lights, to avoid blinding users
+* set the brightness depending on the time of day to avoid blinding users at night
+* give users a chance to override the logic, for example, use a wall switch to turn the lights off regardless of the presence
+
+![]({{ site.baseurl }}/images/lights_presence.png)
+*Node-RED flow that handles these requirements, the functions use global variables to handle the overrides and synchronize state*
+
+---
+
+## Future projects
+
+Replace/augment the time of day logic with brightness sensor output to set the brightness of the lights based on the current light conditions in the room.

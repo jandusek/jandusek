@@ -1,0 +1,54 @@
+---
+layout: post
+title: "Smart home #2: Architecture"
+image: architecture.jpg
+date: 2022-10-02 08:33:00 +0800
+---
+In this chapter I'll introduce the architecture I chose, list some of the platforms I've used and describe how I integrated them together.
+
+---
+
+# Decoupling
+
+First, let's talk about the **decoupling** of the controls and the controlled elements. I'll use lights in this example but it applies to all types of devices.
+
+**Why it matters:** The traditional way of controlling lights by connecting and disconnecting power is not well suited for smart homes.
+
+![]({{ site.baseurl }}/images/wiring_1.svg)
+*Traditional wiring of lights with two switches in a room*
+
+* **Lights are unreachable when off**, this may be a problem for platforms like Philips Hue.
+* **Granularity is hard-wired** during installation. You can't control individual lights or change light grouping as your home evolves.
+* **Dimming is hard to do** and controls for that would also have to be hard-wired.
+
+There are ways to use traditional wiring in smart home setups, for example by using a smart switch that connects and disconnects power to the lights.
+
+But the cleanest approach that gives the most flexibility and future-proofness to your setup is **decoupling** these two functions.
+
+![]({{ site.baseurl }}/images/wiring_2.svg)
+*Decoupled wiring of lights*
+
+That means that your switches merely inform your controller when they are pressed. The lights are powered constantly and the controller instructs specific lights to turn on or off as needed.
+
+---
+
+# Platforms
+
+After a lot of research, I've settled on using these platforms:
+
+* **[KNX](https://www.knx.org)** wired standard I'm using for wall switches, sensors and actuators
+* **[Z-Wave](https://www.z-wave.com)** for sensors where KNX wasn't an option
+* **[DALI](https://www.dali-alliance.org/dali/)** wired standard I'm using for controlling most indoor lights
+* **[Philips Hue](https://www.philips-hue.com)** for lights where DALI wasn't an option
+* **[LinkTap](https://www.link-tap.com)** for irrigation
+* **Wifi** for closed platforms that don't support anything else
+    * **Daikin** proprietary platform for connected ACs
+    * **[Tuya](https://www.tuya.com)** semi-open platform I'm using for ceiling fans
+    * **[Ecowitt](https://www.ecowitt.com)** proprietary platform I'm using for rain and soil humidity sensors
+* **[Home Assitant](https://www.home-assistant.io)** to bridge and control all of these platforms
+  * **[Node-RED](https://community.home-assistant.io/t/home-assistant-community-add-on-node-red/55023)** to define the automation logic
+
+![]({{ site.baseurl }}/images/architecture.svg)
+*Platforms and connectivity*
+
+In the next chapters, I'll share my notes on these platforms and mention what worked and what didn't.

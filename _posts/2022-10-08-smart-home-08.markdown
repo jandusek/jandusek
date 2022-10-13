@@ -1,0 +1,113 @@
+---
+layout: post
+title: "Smart home #8: Garden automation"
+image: watering_can.jpg
+date: 2022-10-08 08:33:00 +0800
+---
+
+Some things you may want to automate in your garden:
+
+* Detect when it **rains** and track how much
+* Monitor **soil humidity**
+* Control **irrigation**
+* If you're collecting **rainwater**, monitor how much water you have
+
+---
+
+## Rain
+
+There are two main types of rain sensors, solving two different problems:
+
+* **Does it rain?** - Useful for reacting to the event itself, for example by checking if windows are closed.
+* **How much it rains?** - Volume over a time period. Not useful for reacting to rain itself as the collection period introduces latency.
+
+I'm using [Elsner P04-KNX-GPS sensor](https://www.futurasmus-knxgroup.com/producto.php?cod_producto=36684) for the first use case. It works well, but KXN weather stations in general are unnecessarily expensive. I would look for a WiFi/Z-wave/Matter weather station instead.
+
+To cover the second use case, I first tried [POPP Z-Rain](https://popp.eu/products/z-rain/). But I've had issues where it would stop updating its state randomly and require a restart.
+
+So instead, I now use [Ecowitt WH40](https://www.ecowitt.com/shop/goodsDetail/49). This uses a proprietary wireless standard (more below) but works well.
+
+---
+
+## Soil humidity
+
+This was a real challenge. First, there are 2 types of soil humidity sensors:
+
+* **Resistive** sensors corrode easily, avoid these
+* **Capacitive** sensors are generally a better choice
+
+Then, there are almost **no smart home-enabled** soil humidity sensors on the market.
+
+A lot of people use [this Xiaomi sensor](https://xiaomi-mi.com/sockets-and-sensors/xiaomi-huahuacaocao-flower-care-smart-monitor/), but it connects over Bluetooth and the range and reliability are not great, according to the reviews.
+
+After a lot of searching, I found [Ecowitt WH51](https://www.ecowitt.com/shop/goodsDetail/19):
+
+* It uses proprietary wireless technology and requires a dedicated [gateway](https://www.ecowitt.com/shop/goodsDetail/16) from that vendor
+* The gateway can only serve up to 8 sensors
+* Ecowitt also has a good rain sensor mentioned above, it can connect to the same gateway
+* It uses a cloud-based app by default, but it can be [integrated into Home Assistant](https://www.home-assistant.io/integrations/ecowitt/) locally
+* Works surprisingly well, the single AA battery powers the sensor for about 6 months
+
+---
+
+## Irrigation
+
+How to irrigate will depend on your garden and local conditions. Our garden is tiny, just 20m², with scorching heat during the day all year round. So I've opted for a [micro drip system](https://www.gardena.com/int/products/watering/micro-drip/). This deposits water to plants' roots and minimizes water loss due to evaporation.
+
+The drip system receives water from two [LinkTap G2S](https://www.link-tap.com/#!/wireless-water-timer) devices. One is mounted to a regular tap and one is mounted to a pressure-activated pump that pumps water from a rainwater collection tank. The idea is that the garden should be watered primarily from the rainwater tank. If the tank is empty, tap water should be used.
+
+**Yes, but:** Using a system with two valves can cause water to flow back through the second, closed valve when the first valve is opened. I once filled my tank from the tap this way. I guess the valves are optimized to prevent water flowing from outside in, but not so much in the other direction. I solved this by installing a [non-return check valve](https://www.aliexpress.com/item/1005002913903364.html?spm=a2g0o.order_list.0.0.3a681802tfgNfB) before each LinkTap device.
+
+I'm fairly apprehensive about any failure in these water-controlling devices:
+
+* If a valve opens but then fails to close, the water will flood the garden and its surroundings, wasting water and potentially damaging property.
+* If the micro drip piping develops a leak, the water flow will skyrocket from the designed 2-3l/min to ten times that much, wasting water and risking flooding.
+
+Luckily the team behind LinkTap is well aware of the risks:
+
+* G2 has a **flow meter** (G1 does not, you want G2) that can alert you of any water flow irregularities.
+* I know my micro drip irrigation can only push 2-3 liters per minute. So if either of the LinkTap devices sees more than 5l/min flowing through it, it'll **shut off the valve and raise an alarm**.
+* If the LinkTap itself breaks and falls off the tap, the water would spray from the tap it used to be connected to uncontrollably. But the flow meter would be disconnected and unable to react. Luckily the G2 has an accelerometer and it can raise an alarm when a **fall is detected**.
+* Home Assistant could also fail to send the instruction to close the valve due to a software error. To address this, LinkTap has a fail-safe where the water can only be **turned on for a maximum of X minutes**. Then it automatically turns off, even without explicit instruction.
+
+Speaking of Home Assistant, at the time of this writing, LinkTap doesn't have a publicly available integration. But their support will send you an unofficial one upon request, and it worked well for me so far.
+
+---
+
+## Tank water level
+
+This is one of the challenges I have yet to solve. But I think I'm fairly close.
+
+There are a couple of ways to measure water level:
+
+1. **Buoys**, I haven't found one that would make it easy to read out its values though
+1. **Time-of-flight**, laser or ultrasonic sensor installed at the top of the tank, pointing downwards and measuring the distance of the water level; laser usually needs something floating on the water surface to bounce off of
+1. **Water pressure**, a pressure sensor either submerged at the bottom of the tank or installed between the tank and the pump
+
+When researching this, reviews of the second option weren't great, so I opted for the third one.
+
+Here's what I have so far:
+
+* [Pressure sensor](https://www.aliexpress.com/item/33059909689.html?spm=a2g0o.order_list.0.0.3a681802tfgNfB) installed between the tank and the pump using a [T-pipe](https://www.aliexpress.com/item/4001261721039.html?spm=a2g0o.order_list.0.0.3a681802tfgNfB)
+* ESP32 device that reads the values from the pressure sensor; needs analog-to-digital (ADC) input, battery and WiFi; I'm using [M5StickC PLUS](https://shop.m5stack.com/products/m5stickc-plus-esp32-pico-mini-iot-development-kit)
+* Small [solar panel](https://www.aliexpress.com/item/1005004354032361.html?spm=a2g0o.order_list.0.0.3a681802tfgNfB) to trickle-charge the ESP32 device during the day
+* [ESPHome](http://esphome.io) firmware to integrate the ESP32 with Home Assistant
+
+This works in theory, but I'm having some issues with the deep sleep of the ESP32 where the device sometimes fails to wake up. I could use a larger battery and give up on the deep sleep, but my small solar panel is barely able to trickle-charge the 120mAh battery.
+
+Additionally, when I tested the pressure sensor by connecting it to a pressurized hose, the ADC mostly worked, but then occasionally returned some very strange values.
+
+Therefore, this remains a work in progress...
+
+---
+
+## Ideas for automation
+
+* Control irrigation based on soil humidity. Check once or twice a day if the soil humidity is below a certain threshold. If it is, turn on the irrigation for a few minutes.
+
+---
+
+## Future projects
+
+* Look into incorporating weather forecast into irrigation decisions (if there's supposed to be a significant rain later today, don't irrigate). LinkTap supports this when you control it via their mobile app.
+* Use soil humidity history and its exact current value to control more precisely how much watering should be done.

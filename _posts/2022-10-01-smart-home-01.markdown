@@ -1,0 +1,81 @@
+---
+layout: post
+title: "Smart home #1: Introduction"
+image: door.jpg
+date: 2022-10-01 14:26:00 +0800
+---
+This series of posts documents my journey to a smart home and home automation.
+
+---
+
+# What smart home *isn't*?
+
+**A common misconception** is seeing smart home as just a way to control home devices via some mobile app. It's understandable because that's how a lot of smart home devices get marketed.
+
+* But there's nothing really **smart** about this setup
+* Moreover, if the app displaces a good old physical switch, you're actually worse off
+
+No one wants to reach for a phone every time they want to turn on lights.
+
+---
+
+# What smart home *is*?
+
+To me, a smart home means:
+
+1. **Connected devices** that expose their current state and allow remote control
+1. **Centralized management** where every device regardless of its vendor or platform can be controlled from one central place
+1. This is then exposed to:
+    * **users for manual control** via channels like voice assistants, mobile apps and good old physical switches
+    * **smart logic** that can automate common tasks
+
+**Why it matters:** Building a smart home is a complex exercise. Why go through the trouble?
+
+1. **No physical remotes**. Remotes from ACs, ceiling fans, curtains, audio system, ... They get lost so easily, and even if they're not lost, they're a mess.
+2. **Actual remote control**
+    * Control lights from the sofa, without having to stand up.
+    * Turn on AC on your way home, so the room is already cold when you get there.
+    * Check if you forgot your stove on and turn it off from your phone.
+3. **Actual smarts**
+    * When a window gets closed after sunset, automatically close the curtains as well.
+    * When it starts raining and a window is open, alert whoever is at home so they can close it.
+    * When you leave on a vacation, have your garden water itself.
+
+**Yes, but:** The added complexity increases surface area for potential problems. The founder of Home Assistant described the [common pitfalls](https://www.home-assistant.io/blog/2016/01/19/perfect-home-automation/) to avoid.
+
+---
+
+# My key learnings
+
+* **Reliability** is absolutely key. A smart switch that only works 95% of the time will frustrate your users. No amazing automation will be able to justify this.
+
+* **Future-proof** your design. Avoid vendor lock-in. Try to use open standards. Avoid solutions that require connectivity to their vendor's cloud and cannot be controlled locally.
+
+An interesting corollary to this I’ve noticed is that a smart home tends to evolve and get better over time, mostly for free. It is quite satisfying to come up with new automation that improves the quality of life, without the need to install new hardware.
+
+* **Wired solutions** are a pain to install, but if you have that option, use them over wireless. The reliability of a good old wire beats any wireless technology.
+
+Your mileage may vary though, and if running new wires is not an option, there are wireless technologies that might produce decent results, especially with new wireless technologies like [Matter](https://csa-iot.org/all-solutions/matter/) coming up.
+
+In our case, we already planned a major renovation of our home which included a lot of wiring. So putting some more wires in the walls didn't add that much extra cost.
+
+As for the types of wires, shielded Ethernet cable is a great universal choice.
+
+* It's cheap and readily available
+    * so cheap in fact that I'd recommend laying **twice as much** as you think you'll need; as a redundancy in case a cable fails and also for future expandability
+    * I also recommend using the **highest category** (CATx) that's still affordable; the sweet spot is usually one or two generations behind the latest
+* You can use it to connect, and with PoE also power, WiFi APs, CCTV or various gateways
+* It can be also used to connect various low-power sensors and actuators, providing 4 twisted pairs in each cable
+
+---
+
+Table of Content of this series:
+
+1. Introduction
+1. [Architecture]({{ site.baseurl }}/2022/10/02/smart-home-02/)
+1. [Switches]({{ site.baseurl }}/2022/10/03/smart-home-03/)
+1. [Remote control]({{ site.baseurl }}/2022/10/04/smart-home-04/)
+1. [Lights]({{ site.baseurl }}/2022/10/05/smart-home-05/)
+1. [HVAC]({{ site.baseurl }}/2022/10/06/smart-home-06/)
+1. [Curtains and windows]({{ site.baseurl }}/2022/10/07/smart-home-07/)
+1. [Garden automation]({{ site.baseurl }}/2022/10/08/smart-home-08/)

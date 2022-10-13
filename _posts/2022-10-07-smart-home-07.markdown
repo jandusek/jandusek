@@ -1,0 +1,44 @@
+---
+layout: post
+title: "Smart home #7: Windows and curtains"
+image: windows.jpg
+date: 2022-10-07 08:33:00 +0800
+---
+
+## Window sensors
+
+There are a lot of advanced wireless sensors on the market that will tell you whether a window is open or closed. But since I had the option of running new wires, I decided to save costs and go with a fairly low-tech solution.
+
+* I installed cheap [wired magnetic sensors](https://www.aliexpress.com/item/32808305276.html?spm=a2g0o.order_list.0.0.34bb1802Y0qUDQ) into the frame of each window.
+* Each window sensor is connected to a [KNX input push button interface](https://www.futurasmus-knxgroup.com/producto.php?cod_producto=62619) which exposes the state of each sensor to the KNX bus.
+* The KXN part is not necessary, those sensors can be connected directly to Home Assistant for example via [ESPHome](https://esphome.io). In my case, the KNX wiring was already going to be installed in every room, so it made sense to plug into that.
+
+---
+
+## Motorized curtains
+
+The use case of motorically closing curtains has also many expensive solutions on the market. And then there are some fairly cheap ones. I didn't find many practical differences, so I opted for one of the cheap ones, specifically [Dooya](https://www.dooya.com/index_en.php).
+
+* Dooya offers models supporting various wireless technologies for controlling motors.
+* In my case, having the option to go wired, I went with [DT82TN](https://www.aliexpress.com/item/32888721331.html).
+* Documentation is sparse. TLDR; it has an RJ11 connector that uses 3 pins: common ground, open and close. To open a curtain, connect the open pin to the common ground. Similarly, for closing, connect the close pin to the common ground.
+
+The motor provides movement, but the curtain also needs a track to move over. There are plenty of Dooya (Aqara) [compatible tracks](https://www.aliexpress.com/item/1005001291069001.html) online.
+
+To control the motors, I'm using [KNX relay actuators](https://www.futurasmus-knxgroup.com/producto.php?cod_producto=62658).
+
+**Yes, but:** Relays are overkill as they are meant to connect 230V and all I'm doing is closing a low-powered control circuit. The relays are also fairly noisy and you do hear clicking sounds when they connect. There are better ways to do this, but I found used relay actuators on eBay and they turned out to be the most affordable option.
+
+---
+
+## Ideas for automation
+
+* Send an alert when it starts raining and a window is open (see next chapter for rain detection).
+* Open/close curtains automatically when the door is opened/closed in the morning/evening.
+
+---
+
+## Future projects
+
+* Stop AC or send an alert when AC is running and a window is open. Ideally, an opened door should also trigger this. However, I don't have door sensors installed right now.
+* I'd love to explore motorized windows. Although when I briefly looked into this, it sounded like a rather large investment that may make sense only for new constructions.

@@ -1,0 +1,98 @@
+---
+layout: post
+title: "Smart home #3: Switches"
+image: switch.jpg
+date: 2022-10-03 08:33:00 +0800
+---
+
+I've used **KNX** to connect the physical switches, some sensors and actuators.
+
+It's a 30-year-old technology used by hotels and offices. It may be overkill for a home, but it is wired and **very reliable**. It connects all devices via a low-power (24V) bus using two shielded twisted pairs.
+
+KNX has a learning curve, but it's not too hard:
+
+1. **Addresses** are assigned to each function, for example, a switch can be configured to broadcast to a group address `1/0/10` when pressed
+2. **Devices listen** to these broadcasts and can be configured to act accordingly, for example, an actuator can be configured to switch on when it sees a broadcast to `1/0/10` group address
+3. **This is all decentralized**, the logic deciding what to broadcast and what to listen for is stored in the individual devices
+
+This decentralization allows you to contain some smart home logic in the KNX bus itself, but you will probably want to expose what is happening in KNX to your central controller (Home Assistant) so that you can bridge KNX with the other platforms.
+
+This will allow you to control KNX devices from other control channels (e.g. voice assistant) and vice versa, control non-KNX devices (e.g. Philips Hue lights) from KNX switches.
+
+To connect the [KNX bus to Home Assistant](https://www.home-assistant.io/integrations/knx/), you'll need a KNX device called [**IP Interface**](https://www.futurasmus-knxgroup.com/search?search_mode=text&q=IP+Interface&engine=&view=grid). It is essentially a bridge enabling Home Assistant to send and receive commands from the KNX bus, over TCP/IP.
+
+### Configuration
+
+KNX devices are configured via software called **ETS** (Windows only). The Home license costs 350 € and it lets you control 64 devices. I'd recommend going through the [ETS eCampus](https://my.knx.org) free web training which discounts the cost to 200 €.
+
+### Wiring
+
+Wiring is simple, just connect all your KNX devices in one large loop. Then disconnect the loop somewhere where you have easy access.
+
+**Why it matters:** KNX is a bus, so loops are undesirable. But having it wired in a loop gives you an option to reconnect the bus from the other end, should your wiring fail somewhere.
+
+![]({{ site.baseurl }}/images/wiring_3.svg)
+*Adding redundancy by wiring a bus as a loop*
+
+---
+
+# Switches
+
+The model I'm using is [Interra iSwitch](https://www.futurasmus-knxgroup.com/producto.php?cod_producto=19126), it looks like this:
+
+![]({{ site.baseurl }}/images/switch_2.jpg)
+*KNX 8-button wall switch; not all LEDs are usually on*
+
+* **8 buttons** that can broadcast different events when pressed or held
+* Each button has an **LED** that can indicate some state
+* The **LCD display** can be pressed up or down, acting as two additional buttons
+
+My example use case:
+
+| Button  | Controlled device | Press | Press & hold | Indicator LED |
+|:--------|:-------:|:-------:|:-------:|:-------:|
+| L1   | downlights | off   | dim down | downlights on |
+| R1   | downlights | on    | dim up   | downlights on |
+|----
+| L2   | covelights | off   | dim down | covelights on |
+| R2   | covelights | on    | dim up   | covelights on |
+|----
+| L3   | AC          | toggle    | -   | AC on          |
+| R3   | ceiling fan | toggle    | -   | ceiling fan on |
+|----
+| L4   | curtains | day curtains open  | night curtains open  | any window open |
+| R4   | curtains | day curtains close | night curtains close | any window open |
+|----
+| LCD up   | ceiling fan | fan speed +  | - | - |
+| LCD down | ceiling fan | fan speed -  | - | - |
+|----
+{: rules="groups"}
+*L = Left, R = Right, number = row*
+
+As you can see, you can potentially control the whole room from a switch like this.
+
+**Yes, but:** The one issue I still haven't resolved is discoverability. Visitors or even other members of your household can't easily figure out what each button does. I've tried labeling the buttons with stickers, but those eventually peel off.
+
+**What didn't work:** I also experimented with a different switch model with a color LCD:
+
+![]({{ site.baseurl }}/images/itr328.png)
+*Switch with touch buttons and a color LCD*
+
+This solves the discoverability and looks even more customizable, but it ended up not working for multiple reasons:
+
+* **Worse customizability**, it's still a KNX switch, so you can only configure it via ETS, for example, the icons are all preconfigured and you can only choose from a library of about 15
+* In an attempt to provide more fine-grained control, some functions are hidden behind a **secondary menu**; so you have to first click on a thermostat and then only on the next screen you can turn the AC on
+* You can **touch the display** to interact with it, but the buttons themselves are now also **just touch buttons**, so you lose the tactile feedback of physical switches which is UX regression
+* And lastly, I experienced a **lot of bugs** with these switches, for some reason they kept restarting and the display would flicker a lot
+
+---
+
+## Ideas for automation
+
+If your switches have indicator LEDs or a display, I recommend dimming them based on the time of day or overall brightness in the room to minimize distractions.
+
+---
+
+## Future projects
+
+I have some old Philips Hue switches and I have some appliances with no physical switch nearby (coffee machine, dining lights). I want to install some Hue switches near those appliances to allow for more convenient control.

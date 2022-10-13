@@ -1,0 +1,53 @@
+---
+layout: post
+title: "Smart home #4: Manual control"
+image: homepod.jpg
+date: 2022-10-04 08:33:00 +0800
+---
+
+There are different ways you control your smart home manually:
+
+1. Physical switches
+1. Home Assistant dashboard
+1. Apple HomeKit
+1. Voice assistants
+1. Desktop
+
+I've covered the physical switches in the [previous chapter]({{ site.baseurl }}/2022/10/03/smart-home-03/), let's now talk about the rest.
+
+---
+
+## Home Assistant dashboard
+
+In Home Assistant, you can create custom [dashboards](https://www.home-assistant.io/dashboards/). This gives you a customizable UI to control your smart home.
+
+**Yes, but:** How do your users access these dashboards? Home Assistant (HA) does not have any [role-based access control](https://community.home-assistant.io/t/wth-no-rbac-role-based-access-control-users-groups-rights/219581). Giving users access to dashboards gives them also access to everything else in HA, including admin controls that can break things when used by accident.
+
+I'm using HA mobile app on my phone, just so I can receive push notifications from my automations. And I have one [Kindle tablet](https://www.amazon.com/Fire-HD-10-Plus-tablet/dp/B08F6FYN6B) in the living area for common use. It is locked in a [kiosk mode](https://www.fully-kiosk.com) to prevent accidental use.
+
+---
+
+## Apple HomeKit
+
+We're an Apple household and Home Assistant has a [HomeKit](https://www.home-assistant.io/integrations/homekit/) integration that allows you to expose all HA devices to HomeKit. This works very well, so that's our main way of controlling our home from mobile devices.
+
+Another advantage is that this works remotely. Whereas with Home Assistant mobile apps, remote access requires either a paid subscription or some [extra work](https://www.home-assistant.io/integrations/tailscale/).
+
+---
+
+## Voice assistants
+
+Being an Apple household, this is solved mostly for free with the aforementioned HomeKit integration. Organizing your devices in HomeKit automatically lets Siri control those devices and Siri's general issues aside, this works very well.
+
+---
+
+## Desktop
+
+You can also control your smart home from your desktop. You can use the HA web dashboard for this, but I wanted something more direct. So that for example, I can turn on my [keylight](https://www.elgato.com/en/key-light) during a video call with just a key press, without having to navigate around the dashboard.
+
+This can be done by simply invoking a [hass-cli](https://www.home-assistant.io/blog/2019/02/04/introducing-home-assistant-cli/) script with some [keyboard shortcut](https://folivora.ai). If you want to get fancy, you can get a dedicated keyboard like this:
+
+![]({{ site.baseurl }}/images/atlantis_9e.jpg)
+*[Atlantis 9e](https://kbd.news/Atlantis-9e-772.html)*
+
+The rotary encoders lend themselves particularly well to controlling brightness/temperature/fan speed.

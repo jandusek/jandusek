@@ -1,0 +1,13 @@
+#-------------------------------
+# General Site Settings
+title: Jan's notes
+logo: logo.svg # You can add own logo.
+description: Notes on random tech topics
+
+
+#-------------------------------
+# Author Settings
+author:
+  name: Jan Dusek
+  say-hello: Hi, I’m <strong>Jan</strong>
+  bio: These are my notes on various tech topics. Feel free to use whatever you find here, I hope some of it is useful.

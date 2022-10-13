@@ -1,0 +1,51 @@
+---
+layout: post
+title: "Smart home #6: HVAC"
+image: hvac.jpg
+date: 2022-10-06 08:33:00 +0800
+---
+
+Heating, ventilation, and air conditioning (HVAC). I can only speak about air conditioning and fans. Unfortunately, I have no experience with heating as in Singapore, excessive heat is the main problem.
+
+I also haven't spent much time worrying about thermostats as ACs tend to have those built in. They don't always work perfectly, but not to the extent that I'd want to reimplement that function myself.
+
+---
+
+## Air conditioning
+
+I'm using Daikin ACs which can be integrated with [Home Assistant over WiFi](https://www.home-assistant.io/integrations/daikin/).
+
+* This integration works well. The only issue is that there's about a **5-second delay** between sending a command and getting back a state confirmation.
+* If you're using **AC state** to for example control a status LED on a switch, there will be a 5-second delay between pressing the button and the LED reacting accordingly. Not a great UX.
+* Alternatively, there are [**KNX interfaces**](https://www.intesis.com/products/ac-interfaces/knx-gateways/daikin-knx-ac-dk-ac-knx-1) for most AC manufacturers, but I have not tried these myself.
+
+---
+
+## Ceiling fans
+
+For ceiling fans, I've settled on a [local Singaporean brand](https://www.poecofan.com) that's using Tuya (over WiFi) for connectivity. [Tuya](https://www.tuya.com) is a Chinese IoT platform controlled via the cloud, but there are ways to [control it locally](https://www.reddit.com/r/homeassistant/comments/oglpgc/absolute_beginners_guide_to_setting_up_local_tuya/). The cloud component can then be disabled by putting those devices on a dedicated VLAN with no internet access.
+
+* This integration is a **bit wonky**. Two of our fans lose connectivity from time to time and I need to power-cycle them to reconnect.
+* When they work, they work reasonably well. There is however a **loud beep** to acknowledge every command. I was not able to turn this off.
+* The fans can also be equipped with an OSRAM **TW light** and this light can also be controlled via Tuya. However, there are only 3 color temperatures that can be set (cool, medium, warm).
+
+![]({{ site.baseurl }}/images/fan.jpg)
+*PO ECO ceiling fan with a light*
+
+---
+
+## Ideas for automation
+
+* Get rid of remotes. Control AC and fans directly from wall switches. Link back AC and fan statuses to switch indicators.
+
+* For rooms with more than one AC unit, control both units simultaneously.
+
+* Display fan speed on wall switches and allow controlling it.
+
+---
+
+## Future projects
+
+* Use the temperature reported by the various connected devices in each room (wall switches and presence sensors typically report it) to control the AC better.
+
+* Find a way to disable different AC modes I'm not using (for example heating) in Home Assistant. Right now, turning on AC requires selecting its 'cooling' HVAC mode. I'd like to be able to just turn it 'ON' which would then always use the cooling mode by default.
